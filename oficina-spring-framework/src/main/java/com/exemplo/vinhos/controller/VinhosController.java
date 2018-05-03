@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,29 +27,33 @@ public class VinhosController {
 	@Autowired
 	private Vinhos vinhos;
 	
+	@DeleteMapping("/{id}")
+	public String remover(@PathVariable Long id, RedirectAttributes attributes) {
+		vinhos.deleteById(id);
+		
+		attributes.addFlashAttribute("mensagem", "Vinho removido com sucesso!");
+		
+		return "redirect:/vinhos/lista-vinhos";
+	}
+	
+	
+	//Método para a listagem de vinhos
 	@GetMapping("/lista-vinhos")
 	public ModelAndView listar() {
 		ModelAndView modelAndView = new ModelAndView("/vinhos/lista-vinhos");
 		modelAndView.addObject("vinhos", vinhos.findAll());
 		return modelAndView;
 	}
-	//Método editar, funcionava na versão anterior, porém na nova não funciona
-	//está criando um novo item na lista.
-	/*
-	 @GetMapping("/{id}")
-	 public ModelAndView editar(@PathVariable("id") Long id){
-	 return novo(vinhos.findOne(id);
-	 } 
-	 */
 	
-	//Novo método da versão nova (muda o retorno), porém continua cadastrando outro
-	//item ao invés de editar.
-	//
+	
+	//Método para edição dos itens
 	@GetMapping("/{id}")
-	public ModelAndView editar(@PathVariable("id") Long id) {
+	public ModelAndView editar(@PathVariable Long id) {
 		return novo(vinhos.findById(id).orElse(null));
 	}
 	
+	
+	//Método para adicionar um novo vinho
 	@GetMapping("/novo")
 	public ModelAndView novo(Vinho vinho) {
 		ModelAndView modelAndView = new ModelAndView("vinhos/cadastro-vinho");
@@ -59,6 +64,8 @@ public class VinhosController {
 		return modelAndView ;
 	}
 	
+	
+	//Método para verficar se há erros e salvar um novo vinho
 	@PostMapping("/novo")
  	public ModelAndView salvar(@Valid Vinho vinho, BindingResult result, RedirectAttributes attributes) {
 		
